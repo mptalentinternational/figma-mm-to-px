@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Print Size → Pixels (Figma)</title>
+
+<style>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  margin: 32px;
+}
+
+.card {
+  max-width: 520px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: block;
+}
+
+.out {
+  margin-top: 18px;
+  padding: 12px;
+  background: #f7f7f7;
+  border-radius: 10px;
+}
+
+.toggle {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+button {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.small {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Toggle switch */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #ccc;
+  border-radius: 24px;
+  transition: 0.25s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.25s;
+}
+
+.switch input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+</style>
+
+</head>
+<body>
+
+<div class="card">
+
+<h2>Print Size → Pixels</h2>
+<div class="small" id="formulaText">
+px = (mm ÷ 25.4) × dpi
+</div>
+
+<div class="toggle">
+  <span>mm</span>
+
+  <label class="switch">
+    <input type="checkbox" id="unitToggle">
+    <span class="slider"></span>
+  </label>
+
+  <span>in</span>
+</div>
+
+<div class="row">
+<div>
+<label id="widthLabel">Width (mm)</label>
+<input id="width" type="number" step="0.01">
+</div>
+
+<div>
+<label id="heightLabel">Height (mm)</label>
+<input id="height" type="number" step="0.01">
+</div>
+</div>
+
+<label>DPI</label>
+<input id="dpi" type="number" value="300">
+
+<div class="toggle">
+<input type="checkbox" id="roundToggle" checked>
+<label for="roundToggle">Round to whole pixels</label>
+</div>
+
+<div class="out">
+<div><strong>Width:</strong> <span id="widthPx">—</span> px</div>
+<div><strong>Height:</strong> <span id="heightPx">—</span> px</div>
+
+<button id="copyBtn" style="margin-top:10px;">Copy WxH</button>
+<span id="copyStatus" class="small"></span>
+</div>
+
+</div>
+
+<script>
+
+const widthInput = document.getElementById("width")
+const heightInput = document.getElementById("height")
+const dpiInput = document.getElementById("dpi")
+
+const widthPx = document.getElementById("widthPx")
+const heightPx = document.getElementById("heightPx")
+
+const roundToggle = document.getElementById("roundToggle")
+const unitToggle = document.getElementById("unitToggle")
+
+const widthLabel = document.getElementById("widthLabel")
+const heightLabel = document.getElementById("heightLabel")
+const formulaText = document.getElementById("formulaText")
+
+const copyBtn = document.getElementById("copyBtn")
+const copyStatus = document.getElementById("copyStatus")
+
+function calculate() {
+
+let w = parseFloat(widthInput.value)
+let h = parseFloat(heightInput.value)
+let dpi = parseFloat(dpiInput.value)
+
+if (!w || !h || !dpi) {
+widthPx.textContent = "—"
+heightPx.textContent = "—"
+return
+}
+
+let wpx
+let hpx
+
+if (unitToggle.checked) {
+
+wpx = w * dpi
+hpx = h * dpi
+
+} else {
+
+wpx = (w / 25.4) * dpi
+hpx = (h / 25.4) * dpi
+
+}
+
+if (roundToggle.checked) {
+wpx = Math.round(wpx)
+hpx = Math.round(hpx)
+} else {
+wpx = wpx.toFixed(2)
+hpx = hpx.toFixed(2)
+}
+
+widthPx.textContent = wpx
+heightPx.textContent = hpx
+}
+
+function updateUnits(){
+
+if(unitToggle.checked){
+
+widthLabel.textContent = "Width (in)"
+heightLabel.textContent = "Height (in)"
+formulaText.textContent = "px = inches × dpi"
+
+}else{
+
+widthLabel.textContent = "Width (mm)"
+heightLabel.textContent = "Height (mm)"
+formulaText.textContent = "px = (mm ÷ 25.4) × dpi"
+
+}
+
+calculate()
+
+}
+
+[widthInput,heightInput,dpiInput,roundToggle].forEach(el=>{
+el.addEventListener("input",calculate)
+})
+
+unitToggle.addEventListener("change",updateUnits)
+
+copyBtn.addEventListener("click", async () => {
+
+let text = `${widthPx.textContent}x${heightPx.textContent}px`
+
+try{
+
+await navigator.clipboard.writeText(text)
+copyStatus.textContent = "Copied!"
+
+}catch{
+
+copyStatus.textContent = "Copy failed"
+
+}
+
+})
+
+calculate()
+
+</script>
+
+</body>
+</html>
